@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  kv1:
+    image: kv-service
+    container_name: kv1
+    networks: [kv-net]
+    ports:
+      - "8000:8000"
+    # override the default entrypoint flags:
+    command:
+      - --LEADER=true
+      - --PEERS=kv2:8000,kv3:8000
+      - -N=3
+      - -W=2
+      - -R=2
+
+  kv2:
+    image: kv-service
+    container_name: kv2
+    networks: [kv-net]
+    ports:
+      - "8001:8000"
+    command:
+      - --LEADER=false
+      - --PEERS=kv1:8000,kv3:8000
+      - -N=3
+      - -W=2
+      - -R=2
+
+  kv3:
+    image: kv-service
+    container_name: kv3
+    networks: [kv-net]
+    ports:
+      - "8002:8000"
+    command:
+      - --LEADER=false
+      - --PEERS=kv1:8000,kv2:8000
+      - -N=3
+      - -W=2
+      - -R=2
+
+networks:
+  kv-net:
+    driver: bridge
