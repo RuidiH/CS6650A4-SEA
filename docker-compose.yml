@@ -111,6 +111,14 @@ services:
     volumes:
       - ./:/mnt/locust
     working_dir: /mnt/locust
+    environment:
+      NUM_KEYS:    "${NUM_KEYS}"
+      LEADER_HOST: "${LEADER_HOST}"
+      WRITE_RATIO: "${WRITE_RATIO}"
+      READ_RATIO:  "${READ_RATIO}"
+      USERS:       "${USERS}"
+      SPAWN_RATE:  "${SPAWN_RATE}"
+      RUN_TIME:    "${RUN_TIME}"
     command:
       - -f
       - locustfile.py

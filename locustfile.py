@@ -40,6 +40,11 @@ class KVUser(HttpUser):
 
     def on_start(self):
         self.current_key = random.randint(0, NUM_KEYS-1)
+        print("Starting tests")
+        print("NUM_KEYS: ", NUM_KEYS)
+        print("CLUSTER_PROB: ", CLUSTER_PROB)
+        print("WRITE_RATIO: ", WRITE_RATIO)
+        print("READ_RATIO: ", READ_RATIO)
 
     def next_key(self):
         if random.random() > CLUSTER_PROB:
