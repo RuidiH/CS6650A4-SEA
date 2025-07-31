@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   kv1:
     image: kv-service
@@ -7,13 +5,12 @@ services:
     networks: [kv-net]
     ports:
       - "8000:8000"
-    # override the default entrypoint flags:
     command:
       - --LEADER=true
-      - --PEERS=kv2:8000,kv3:8000
-      - -N=3
-      - -W=2
-      - -R=2
+      - --PEERS=kv2:8000,kv3:8000,kv4:8000,kv5:8000
+      - -N=5
+      - -W=${WRITE_QUORUM}
+      - -R=${READ_QUORUM}
 
   kv2:
     image: kv-service
@@ -23,10 +20,10 @@ services:
       - "8001:8000"
     command:
       - --LEADER=false
-      - --PEERS=kv1:8000,kv3:8000
-      - -N=3
-      - -W=2
-      - -R=2
+      - --PEERS=kv1:8000,kv3:8000,kv4:8000,kv5:8000
+      - -N=5
+      - -W=${WRITE_QUORUM}
+      - -R=${READ_QUORUM}
 
   kv3:
     image: kv-service
@@ -36,10 +33,89 @@ services:
       - "8002:8000"
     command:
       - --LEADER=false
-      - --PEERS=kv1:8000,kv2:8000
-      - -N=3
-      - -W=2
-      - -R=2
+      - --PEERS=kv1:8000,kv2:8000,kv4:8000,kv5:8000
+      - -N=5
+      - -W=${WRITE_QUORUM}
+      - -R=${READ_QUORUM}
+
+  kv4:
+    image: kv-service
+    container_name: kv4
+    networks: [kv-net]
+    ports:
+      - "8003:8000"
+    command:
+      - --LEADER=false
+      - --PEERS=kv1:8000,kv2:8000,kv3:8000,kv5:8000
+      - -N=5
+      - -W=${WRITE_QUORUM}
+      - -R=${READ_QUORUM}
+
+  kv5:
+    image: kv-service
+    container_name: kv5
+    networks: [kv-net]
+    ports:
+      - "8004:8000"
+    command:
+      - --LEADER=false
+      - --PEERS=kv1:8000,kv2:8000,kv3:8000,kv4:8000
+      - -N=5
+      - -W=${WRITE_QUORUM}
+      - -R=${READ_QUORUM}
+
+  locust-master:
+    image: locustio/locust:latest
+    container_name: locust-master
+    networks:
+      kv-net:
+        aliases:
+          - locust-master
+    depends_on:
+      - kv1
+      - kv2
+      - kv3
+      - kv4
+      - kv5
+    # 1) bind the entire host folder into /mnt/locust 
+    #    instead of just locustfile.py
+    volumes:
+      - ./:/mnt/locust
+
+    # 2) start in that folder
+    working_dir: /mnt/locust
+    environment:
+      NUM_KEYS:    "${NUM_KEYS}"
+      LEADER_HOST: "${LEADER_HOST}"
+      WRITE_RATIO: "${WRITE_RATIO}"
+      READ_RATIO:  "${READ_RATIO}"
+      USERS:       "${USERS}"
+      SPAWN_RATE:  "${SPAWN_RATE}"
+      RUN_TIME:    "${RUN_TIME}"
+    command:
+      - -f
+      - locustfile.py
+      - --master
+      - --headless
+      - --users=${USERS}
+      - --spawn-rate=${SPAWN_RATE}
+      - --run-time=${RUN_TIME}
+      - --host=${LEADER_HOST}
+
+  locust-worker:
+    image: locustio/locust:latest
+    networks:
+      - kv-net
+    depends_on:
+      - locust-master
+    volumes:
+      - ./:/mnt/locust
+    working_dir: /mnt/locust
+    command:
+      - -f
+      - locustfile.py
+      - --worker
+      - --master-host=locust-master
 
 networks:
   kv-net:
