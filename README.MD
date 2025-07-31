@@ -3,11 +3,11 @@
 The docker-compose.yml hard-code 5 key-value pair nodes. R and W (default to 4) are adjustable in .env file.
 
 ### Files
-main.go -> Key-Value Service logics
-locustfile.py -> Load Test
-analyze.py -> Aggregates Result and plotting
-Dockerfile -> For building go server image
-docker-compos.yml -> Runs kv-services, locust masters and workers
+ - main.go -> Key-Value Service logics
+ - locustfile.py -> Load Test
+ - analyze.py -> Aggregates Result and plotting
+ - Dockerfile -> For building go server image
+ - docker-compos.yml -> Runs kv-services, locust masters and workers
 
 
 SLA Resiliency Testing is not included in this repo.
