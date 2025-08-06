@@ -59,14 +59,14 @@ class KVUser(HttpUser):
 
         # ← FIXED: with‑block + catch_response
         with self.client.post(
-            f"{LEADER_HOST}/put?key={key}&value={int(ts_ms)}",
-            name="/put",
+            f"{LEADER_HOST}/set?key={key}&value={int(ts_ms)}",
+            name="/set",
             catch_response=True
         ) as resp:
             if resp.status_code == 200:
                 resp.success()
             else:
-                resp.failure(f"PUT failed: {resp.status_code}")
+                resp.failure(f"SET failed: {resp.status_code}")
 
     @task(READ_RATIO)
     def read(self):

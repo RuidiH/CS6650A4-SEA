@@ -28,8 +28,15 @@ Parameters you can tune:
  - Number of locust workers, see below on how to use.
  - writeDelay and readDelay in main.go, default set to A4 requirement.
 
+## Test
+```
+go test -v
+```
+
 ## Build kv-service image
+```
 docker build . -t kv-service
+```
 
 ## Load Test with Locust
 
